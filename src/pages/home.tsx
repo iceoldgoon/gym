@@ -15,7 +15,7 @@ const Home = () => {
             A hugo selection of health and fitness content,heathly recipes and
             transformation stories to help you get fit and stay fit!
           </p>
-          <Link to={"/auth"}>
+          <Link className="w-[100px]" to={"/auth"}>
             <Button className="w-fit mt-6 font-bold h-12" size={"lg"}>
               Join club now
             </Button>
