@@ -3,12 +3,59 @@ import { Separator } from "../ui/separator";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Social from "./social";
-import Nerobot from "./nerobot";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { loginSchema } from "@/lib/validation";
+import { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/firebase/fire-config";
+import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import FillMode from "@/pages/fill-mode";
 
 const Login = () => {
   const { setAuth } = useAuthState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof loginSchema>) {
+    const { email, password } = values;
+    setIsLoading(true);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/");
+    } catch (error) {
+      const resulte = error as Error;
+
+      setError(resulte.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <div className="flex flex-col">
+      {isLoading && <FillMode />}
       <h2 className="text-xl font-bold">Login</h2>
       <p className="text-muted-foreground">
         Don't have an account?{" "}
@@ -19,20 +66,51 @@ const Login = () => {
           Sign up
         </span>
       </p>
-      <div className="mt-3">
+      <div className="my-3">
         <Separator />
+        {error && (
+          <Alert variant="destructive">
+            <ExclamationTriangleIcon className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </div>
-      <div className="mt-4">
-        <span>Email</span>
-        <Input className="mt-1 w-full py-5" placeholder="example@gamil.com" />
-      </div>
-
-      <div className="w-full">
-        <span>Password</span>
-        <Input placeholder="*****" className="py-5 mt-1" type="password" />
-      </div>
-      <Nerobot />
-      <Button className="mt-3 w-full py-5">Register</Button>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="example@gmail.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input placeholder="*****" type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div>
+            <Button type="submit" className="w-full h-12">
+              Submit
+            </Button>
+          </div>
+        </form>
+      </Form>
 
       <Social />
     </div>
