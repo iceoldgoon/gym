@@ -12,22 +12,26 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { auth } from "@/firebase/fire-config";
+import { CgGym } from "react-icons/cg";
 
 const UserBox = () => {
   const { user, setUser } = useUserState();
- 
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   if (!user) return <LucideLoader2 className="animate-spin" />;
 
-  const onLogout = () =>{
-    auth.signOut().then(() =>{
-      setUser(null)
-      navigate("/auth")
-    })
-  }
+  const onLogout = () => {
+    auth.signOut().then(() => {
+      setUser(null);
+      navigate("/auth");
+    });
+  };
 
+
+  const onDashboard =() =>{
+    navigate("/dashboard");
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -63,9 +67,18 @@ const UserBox = () => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="cursor-pointer" onClick={onLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              <span>Logout</span>
+          <DropdownMenuItem className="cursor-pointer"
+          onClick={onDashboard}
+          >
+            <CgGym className="w-4 h-4 mr-2" />
+            <span>GYM</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer bg-destructive mt-1"
+            onClick={onLogout}
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            <span>Logout</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

@@ -3,9 +3,23 @@ import { featuredItems, programs } from "@/constants";
 import men from "@/assets/men.png";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { Card } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useUserState } from "@/stores/user.store";
+import { CgGym } from "react-icons/cg";
+import { LogOut } from "lucide-react";
+import { auth } from "@/firebase/fire-config";
 
 const Home = () => {
+  const { user, setUser } = useUserState();
+
+  const navigate = useNavigate();
+
+  const onLogout = () => {
+    auth.signOut().then(() => {
+      setUser(null);
+      navigate("/auth");
+    });
+  };
   return (
     <>
       <div className="w-full h-screen flex items-center mt-20">
@@ -15,11 +29,35 @@ const Home = () => {
             A hugo selection of health and fitness content,heathly recipes and
             transformation stories to help you get fit and stay fit!
           </p>
-          <Link className="w-[100px]" to={"/auth"}>
-            <Button className="w-fit mt-6 font-bold h-12" size={"lg"}>
-              Join club now
-            </Button>
-          </Link>
+
+          {user ? (
+            <div className="flex gap-4">
+              <Link to={"/dashboard"}>
+                <Button className="w-fit mt-6 font-bold h-12" size={"lg"}>
+                  <span>Go To GYM</span>
+                  <CgGym className="h-5 w-5 ml-2" />
+                </Button>
+              </Link>
+
+              <Link to={"/auth"}>
+                <Button
+                  className="w-fit bg-destructive mt-6 font-bold h-12"
+                  size={"lg"}
+                  onClick={onLogout}
+                >
+                  <span>LogOut</span>
+                  <LogOut className="h-5 w-5 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <Link className="w-[100px]" to={"/auth"}>
+              <Button className="w-fit mt-6 font-bold h-12" size={"lg"}>
+                Join club now
+              </Button>
+            </Link>
+          )}
+
           <div className="mt-24">
             <p className="text-muted-foreground">AS FEATURED IN</p>
             <div className="flex items-center gap-4 mt-2">
