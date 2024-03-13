@@ -4,6 +4,7 @@ import Navbar from "@/components/shared/navbar";
 import Auth from "./pages/auth";
 import NoteFound from "./pages/note-found";
 import Dashboard from "./pages/dashboard";
+import { Toaster } from "sonner";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
         </Route>
         <Route path="*" element={<NoteFound />} />
       </Routes>
+      <Toaster position="top-center" />
     </>
   );
 };

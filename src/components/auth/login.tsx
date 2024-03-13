@@ -22,11 +22,13 @@ import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import FillMode from "@/pages/fill-mode";
+import { useUserState } from "@/stores/user.store";
 
 const Login = () => {
   const { setAuth } = useAuthState();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const { setUser } = useUserState();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -42,7 +44,8 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const res = await signInWithEmailAndPassword(auth, email, password);
+      setUser(res.user);
       navigate("/");
     } catch (error) {
       const resulte = error as Error;

@@ -22,9 +22,11 @@ import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import FillMode from "@/pages/fill-mode";
+import { useUserState } from "@/stores/user.store";
 
 const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { setUser } = useUserState();
   const [error, setEror] = useState("");
 
   const navigate = useNavigate();
@@ -46,7 +48,8 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+     const res = await createUserWithEmailAndPassword(auth, email, password);
+     setUser(res.user)
       navigate("/");
     } catch (error) {
       const resulte = error as Error;
