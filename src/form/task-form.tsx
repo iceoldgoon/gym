@@ -24,7 +24,7 @@ interface Props {
   handler: (values: z.infer<typeof taskSchema>) => Promise<void | null>;
 }
 
-const TaskForm = ({ title = "", handler }: Props) => {
+const TaskForm = ({ title = "", handler, isEdit, onClose }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useUserState();
 
@@ -38,7 +38,7 @@ const TaskForm = ({ title = "", handler }: Props) => {
   async function onSubmit(values: z.infer<typeof taskSchema>) {
     if (!user) return null;
     setIsLoading(true);
-    const promise = handler(values).finally(() => setIsLoading(false))
+    const promise = handler(values).finally(() => setIsLoading(false));
 
     toast.promise(promise, {
       loading: "Loading...",
@@ -70,7 +70,18 @@ const TaskForm = ({ title = "", handler }: Props) => {
             )}
           />
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            {isEdit && (
+              <Button
+                type="button"
+                disabled={isLoading}
+                className=" h-12"
+                variant={"destructive"}
+                onClick={onClose}
+              >
+                Cancel
+              </Button>
+            )}
             <Button type="submit" disabled={isLoading} className=" h-12">
               Submit
             </Button>

@@ -11,16 +11,39 @@ import { Separator } from "@/components/ui/separator";
 import { db } from "@/firebase/fire-config";
 import TaskForm from "@/form/task-form";
 import { taskSchema } from "@/lib/validation";
+import { TaskService } from "@/service/task.service";
 import { useUserState } from "@/stores/user.store";
-import { addDoc, collection } from "firebase/firestore";
+import { useQuery } from "@tanstack/react-query";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { BadgePlus } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
+import FillMode from "./fill-mode";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { ITask } from "@/types";
+import { toast } from "sonner";
 
 const Dashboard = () => {
+  const [isEdting, setIsEdting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCurrentTask, setIsCurrentTask] = useState<ITask | null>(null);
+
   const [open, setOpen] = useState(false);
 
   const { user } = useUserState();
+
+  const { isPending, error, data, refetch } = useQuery({
+    queryKey: ["tasks-data"],
+    queryFn: TaskService.getTasks,
+  });
+
   const onAdd = async ({ title }: z.infer<typeof taskSchema>) => {
     if (!user) return null;
     return addDoc(collection(db, "tasks"), {
@@ -29,7 +52,42 @@ const Dashboard = () => {
       endTime: null,
       status: "Unstarted",
       id: user?.uid,
-    }).then(() => setOpen(false));
+    })
+      .then(() => refetch())
+      .finally(() => setOpen(false));
+  };
+
+  const onDelete = async (id: string) => {
+    setIsDeleting(true);
+    const promise = deleteDoc(doc(db, "tasks", id))
+      .then(() => refetch())
+      .finally(() => setIsDeleting(false));
+
+    toast.promise(promise, {
+      loading: "Lodaing...",
+      success: "Successfully deleted!",
+      error: "Someting went wrong!",
+    });
+  };
+
+  const onUpdate = async ({ title }: z.infer<typeof taskSchema>) => {
+    if (!user) return null;
+    if (!isCurrentTask) return null;
+
+    const ref = doc(db, "tasks", isCurrentTask.id);
+    const promise = updateDoc(ref, {
+      title,
+    })
+      .then(() => refetch())
+      .finally(() => setIsEdting(false))
+      .catch((e) => console.log(e));
+
+    return promise;
+  };
+
+  const onStartingEditing = (task: ITask) => {
+    setIsEdting(true);
+    setIsCurrentTask(task);
   };
 
   return (
@@ -50,17 +108,51 @@ const Dashboard = () => {
                     <DialogTitle>Added a new Training</DialogTitle>
                   </DialogHeader>
                   <Separator />
-                  <TaskForm handler={onAdd} />
+                  <TaskForm
+                    handler={
+                      onAdd as (
+                        values: z.infer<typeof taskSchema>
+                      ) => Promise<void | null>
+                    }
+                  />
                 </DialogContent>
               </Dialog>
             </div>
             <Separator />
             <div className="w-full p-4 rounded-md flex justify-between bg-gradient-to-b from-background to-secondary relative min-h-60">
-              <div className="flex flex-col space-y-3 w-full">
-                {Array.from({ length: 3 }).map((_, idx) => (
-                  <TaskItem />
-                ))}
-              </div>
+              {isPending || (isDeleting && <FillMode />)}
+              {error && (
+                <Alert variant="destructive">
+                  <ExclamationTriangleIcon className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error.message}</AlertDescription>
+                </Alert>
+              )}
+              {data && (
+                <div className="flex flex-col space-y-3 w-full">
+                  {!isEdting &&
+                    data.tasks.map((task) => (
+                      <TaskItem
+                        key={task.id}
+                        task={task}
+                        onStartingEditing={() => onStartingEditing(task)}
+                        onDelete={() => onDelete(task.id)}
+                      />
+                    ))}
+                  {isEdting && (
+                    <TaskForm
+                      title={isCurrentTask?.title}
+                      isEdit
+                      onClose={() => setIsEdting(false)}
+                      handler={
+                        onUpdate as (
+                          values: z.infer<typeof taskSchema>
+                        ) => Promise<void | null>
+                      }
+                    />
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
