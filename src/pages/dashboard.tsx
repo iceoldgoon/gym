@@ -31,7 +31,6 @@ import { ITask } from "@/types";
 import { toast } from "sonner";
 import { addMilliseconds, addMinutes, format } from "date-fns";
 
-
 const Dashboard = () => {
   const [isEdting, setIsEdting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -91,15 +90,16 @@ const Dashboard = () => {
     setIsEdting(true);
     setIsCurrentTask(task);
   };
-	const formatDate = (time: number) => {
-		const date = addMilliseconds(new Date(0), time)
-		const formattedDate = format(
-			addMinutes(date, date.getTimezoneOffset()),
-			'HH:mm:ss'
-		)
+  
+  const formatDate = (time: number) => {
+    const date = addMilliseconds(new Date(0), time);
+    const formattedDate = format(
+      addMinutes(date, date.getTimezoneOffset()),
+      "HH:mm:ss"
+    );
 
-		return formattedDate
-	}
+    return formattedDate;
+  };
   return (
     <>
       <div className="h-screen max-w-6xl mx-auto flex items-center">
@@ -167,44 +167,44 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className='flex flex-col space-y-3 w-full'>
-						<div className='p-4 rounded-md bg-gradient-to-r from-blue-900 to-background relative h-24'>
-							<div className='text-2xl font-bold'>Total week</div>
-							{isPending ? (
-								<FillMode />
-							) : (
-								data && (
-									<div className='text-3xl font-bold'>
-										{formatDate(data.weekTotal)}
-									</div>
-								)
-							)}
-						</div>
-						<div className='p-4 rounded-md bg-gradient-to-r from-secondary to-background relative h-24'>
-							<div className='text-2xl font-bold'>Total month</div>
-							{isPending ? (
-								<FillMode />
-							) : (
-								data && (
-									<div className='text-3xl font-bold'>
-										{formatDate(data.monthTotal)}
-									</div>
-								)
-							)}
-						</div>
-						<div className='p-4 rounded-md bg-gradient-to-r from-destructive to-background relative h-24'>
-							<div className='text-2xl font-bold'>Total time</div>
-							{isPending ? (
-								<FillMode />
-							) : (
-								data && (
-									<div className='text-3xl font-bold'>
-										{formatDate(data.total)}
-									</div>
-								)
-							)}
-						</div>
-					</div>
+          <div className="flex flex-col space-y-3 w-full">
+            <div className="p-4 rounded-md bg-gradient-to-r from-blue-900 to-background relative h-24">
+              <div className="text-2xl font-bold">Total week</div>
+              {isPending ? (
+                <FillMode />
+              ) : (
+                data && (
+                  <div className="text-3xl font-bold">
+                    {formatDate(data.weekTotal)}
+                  </div>
+                )
+              )}
+            </div>
+            <div className="p-4 rounded-md bg-gradient-to-r from-secondary to-background relative h-24">
+              <div className="text-2xl font-bold">Total month</div>
+              {isPending ? (
+                <FillMode />
+              ) : (
+                data && (
+                  <div className="text-3xl font-bold">
+                    {formatDate(data.monthTotal)}
+                  </div>
+                )
+              )}
+            </div>
+            <div className="p-4 rounded-md bg-gradient-to-r from-destructive to-background relative h-24">
+              <div className="text-2xl font-bold">Total time</div>
+              {isPending ? (
+                <FillMode />
+              ) : (
+                data && (
+                  <div className="text-3xl font-bold">
+                    {formatDate(data.total)}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </>

@@ -51,6 +51,7 @@ const TaskItem = ({ task, onStartingEditing, onDelete, refetch }: Props) => {
         endTime: Date.now(),
         totalTime: newTotalTime,
       });
+      refetch();
     } catch (error) {
       toast.error("An error occured");
     } finally {
